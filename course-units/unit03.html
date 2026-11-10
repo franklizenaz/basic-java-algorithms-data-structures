@@ -1,0 +1,1071 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pilas y Colas</title>
+<style>
+:root{--ink:#eef5ff;--muted:#9fb0c8;--bg:#07111f;--panel:#0d1c31;--panel2:#122844;--line:#284461;--cyan:#4de1d0;--gold:#ffc857;--pink:#ff7b9c;--blue:#70a7ff;--green:#86efac;--shadow:0 18px 60px rgba(0,0,0,.28)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(circle at 15% 0%,#163355 0,#07111f 44%);color:var(--ink)}
+body{overflow-x:hidden}.app{max-width:1240px;margin:auto;padding:22px 22px 76px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.brand{display:flex;gap:12px;align-items:center}.logo{width:42px;height:42px;border:1px solid var(--cyan);border-radius:12px;display:grid;place-items:center;color:var(--cyan);font-weight:800;box-shadow:0 0 22px #4de1d033}.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);font-weight:700}.progress{min-width:230px}.progress-label{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-bottom:7px}.track{height:6px;background:#19304b;border-radius:99px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:99px;transition:width .35s ease}
+.slide{display:none;animation:rise .42s ease}.slide.active{display:block}@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(34px,5vw,64px);line-height:1;letter-spacing:-.05em;margin:10px 0 18px}h2{font-size:clamp(26px,3.6vw,42px);letter-spacing:-.035em;margin:8px 0 10px}h3{margin:0 0 8px;font-size:17px}p{color:var(--muted);font-size:16px;line-height:1.6;margin:6px 0}.lead{font-size:19px;max-width:760px}.hero{padding:26px 0 18px;max-width:920px}.accent{color:var(--cyan)}.gold{color:var(--gold)}.pink{color:var(--pink)}.green{color:var(--green)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:18px}.card{background:linear-gradient(145deg,#10233d,#0b172a);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}.span-9{grid-column:span 9}.span-12{grid-column:span 12}.tag{display:inline-flex;border:1px solid #365a78;color:var(--blue);padding:5px 10px;border-radius:99px;font-size:12px;font-weight:700;margin:3px}.big-number{font-size:36px;font-weight:800;line-height:1}.muted{color:var(--muted)}ul{color:var(--muted);line-height:1.7;padding-left:20px;margin:6px 0}li::marker{color:var(--cyan)}code{background:#0a1a2e;padding:1px 6px;border-radius:5px;color:#b6ee95;font-family:ui-monospace,monospace;font-size:14px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin-top:14px}.flow-step{flex:1;min-width:130px;background:#10243b;border:1px solid #31526d;border-radius:14px;padding:14px}.arrow{display:grid;place-items:center;color:var(--cyan);font-size:24px}
+
+.stack-wrap{display:flex;flex-direction:column-reverse;align-items:center;gap:6px;min-height:230px;padding:14px 0;justify-content:flex-start}
+.stack-cell{position:relative;width:110px;height:48px;border:1px solid #41637e;background:#152f4a;border-radius:10px;display:grid;place-items:center;font-size:17px;font-weight:800;transition:.3s}
+.stack-cell small{position:absolute;right:-46px;top:14px;color:var(--muted);font-size:10px;font-weight:500}
+.stack-cell.top{background:#154e58;border-color:var(--cyan);box-shadow:0 0 18px #4de1d044}
+.stack-cell.inserted{background:#12402c;border-color:var(--green);color:var(--green);animation:pop .4s ease}
+.stack-cell.removed{background:#4a1f28;border-color:var(--pink);color:var(--pink);opacity:.5;transform:scale(.92)}
+.stack-cell.empty{color:#53708b;border-style:dashed}
+.stack-cell.ghost{opacity:.25;border-style:dashed}
+@keyframes pop{0%{transform:scale(.8);opacity:0}80%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+
+.queue-wrap{display:flex;align-items:center;gap:6px;min-height:100px;padding:14px 0;flex-wrap:wrap;justify-content:center}
+.qcell{position:relative;width:78px;height:58px;border:1px solid #41637e;background:#152f4a;border-radius:10px;display:grid;place-items:center;font-size:17px;font-weight:800;transition:.3s}
+.qcell small{position:absolute;bottom:-18px;color:var(--muted);font-size:10px;font-weight:500}
+.qcell.front{background:#154e58;border-color:var(--cyan);box-shadow:0 0 18px #4de1d044}
+.qcell.rear{background:#2c3d5b;border-color:var(--blue)}
+.qcell.inserted{background:#12402c;border-color:var(--green);color:var(--green);animation:pop .4s ease}
+.qcell.removed{background:#4a1f28;border-color:var(--pink);color:var(--pink);opacity:.5;transform:scale(.92)}
+.qcell.empty{color:#53708b;border-style:dashed}
+.qcell.ghost{opacity:.25;border-style:dashed}
+.marker{font-size:11px;color:var(--cyan);font-weight:700;letter-spacing:.1em}
+
+.prio-row{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed #284461;flex-wrap:wrap}
+.prio-badge{min-width:32px;padding:4px 8px;border-radius:8px;background:#15304d;border:1px solid #335571;font-weight:800;font-size:12px;color:var(--cyan);text-align:center}
+.prio-badge.high{background:#4a1f28;border-color:var(--pink);color:var(--pink)}
+.prio-badge.mid{background:#5b3f1d;border-color:var(--gold);color:var(--gold)}
+.prio-badge.low{background:#12402c;border-color:var(--green);color:var(--green)}
+.prio-item{background:#152f4a;border:1px solid #41637e;border-radius:10px;padding:6px 10px;font-weight:700;font-size:13px}
+
+.control-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.btn{border:1px solid #3b6483;background:#132a44;color:var(--ink);border-radius:11px;padding:9px 14px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;transition:.2s}.btn:hover:not(:disabled){transform:translateY(-2px);border-color:var(--cyan)}.btn:disabled{opacity:.45;cursor:not-allowed}.btn.primary{background:var(--cyan);border-color:var(--cyan);color:#062026}.btn.ghost{background:transparent}.status{color:var(--gold);font-size:13px;min-height:20px;margin-top:6px}
+.code{background:#07101d;border:1px solid #203b56;border-radius:12px;overflow:auto}.code pre{margin:0;padding:16px;color:#d9e8fa;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}.kw{color:#ff93ae}.type{color:#73d4ff}.str{color:#b6ee95}.cm{color:#718aa4}.num{color:#ffc857}.method{color:#fde047}
+.quiz{display:grid;gap:8px;margin-top:12px}.option{text-align:left;width:100%}.option.correct{border-color:var(--green);color:var(--green)}.option.wrong{border-color:var(--pink);color:var(--pink)}.answer{min-height:22px;color:var(--green);font-weight:700;margin-top:8px;font-size:13px}
+.note{background:#2a2410;border-left:4px solid var(--gold);padding:10px 14px;border-radius:10px;margin:12px 0;font-size:14px;color:#f5e6b8}
+.footer-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px;padding-top:14px;border-top:1px solid var(--line)}.counter{color:var(--muted);font-size:13px}.kbd{border:1px solid #48657f;background:#10243b;padding:3px 7px;border-radius:6px;font:12px ui-monospace;color:var(--cyan)}
+.term{display:flex;gap:8px;padding:8px 0;border-bottom:1px dashed #284461;flex-wrap:wrap}.term b{color:var(--cyan);min-width:140px}.term span{color:var(--muted);flex:1}
+@media(max-width:800px){.app{padding:16px 14px 60px}.topbar{align-items:flex-start;flex-direction:column}.progress{width:100%}.span-3,.span-4,.span-5,.span-6,.span-7,.span-8,.span-9{grid-column:span 12}.flow{flex-direction:column}.arrow{transform:rotate(90deg)}.lead{font-size:17px}.stack-cell{width:90px;height:42px}.qcell{width:64px;height:50px;font-size:15px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">A3</div>
+    <div>
+      <div class="eyebrow">Estructuras dinámicas</div>
+      <strong>Pilas y Colas</strong>
+    </div>
+  </div>
+  <div class="progress">
+    <div class="progress-label"><span id="progressText">1 / 22</span><span>progreso</span></div>
+    <div class="track"><div class="bar" id="bar"></div></div>
+  </div>
+</header>
+
+<!-- 1 · INICIO -->
+<section class="slide active" data-title="Inicio">
+  <div class="hero">
+    <h1>Dos formas de ordenar la <span class="accent">salida</span>.</h1>
+    <p class="lead">Ya conoces las listas enlazadas. Ahora veremos dos estructuras muy usadas que se construyen sobre ellas: la <b>pila</b> (el último que entra es el primero que sale) y la <b>cola</b> (el primero que entra es el primero que sale). También veremos las colas con prioridad, donde no siempre gana el más antiguo.</p>
+    <div class="control-row"><button class="btn primary" data-next>Comenzar recorrido →</button><span class="muted">Usa <span class="kbd">←</span> <span class="kbd">→</span> para avanzar</span></div>
+  </div>
+  <div class="grid">
+    <div class="card span-4"><div class="big-number accent">01</div><h3>Pila</h3><p>El <b>último</b> que entra es el <b>primero</b> que sale.</p></div>
+    <div class="card span-4"><div class="big-number gold">02</div><h3>Cola</h3><p>El <b>primero</b> que entra es el <b>primero</b> que sale.</p></div>
+    <div class="card span-4"><div class="big-number pink">03</div><h3>Prioridad</h3><p>La cola atiende según un criterio, no solo el orden de llegada.</p></div>
+  </div>
+</section>
+
+<!-- 2 · QUÉ VAS A APRENDER -->
+<section class="slide" data-title="Qué vas a aprender">
+  <span class="tag">Objetivos</span>
+  <h2>Qué vas a aprender.</h2>
+  <p class="lead">Al terminar este recorrido podrás construir pilas y colas, entender sus diferencias y elegir la implementación adecuada.</p>
+  <div class="grid">
+    <div class="card span-12">
+      <h3>Al finalizar podrás</h3>
+      <ul>
+        <li>Explicar qué significa "el último en entrar es el primero en salir" (pila) y "el primero en entrar es el primero en salir" (cola).</li>
+        <li>Implementar pilas con arreglos y con listas enlazadas.</li>
+        <li>Implementar colas con arreglos (circular) y con listas enlazadas.</li>
+        <li>Distinguir una cola simple de una cola con prioridad.</li>
+        <li>Elegir la implementación adecuada según el problema.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · REPASO RÁPIDO -->
+<section class="slide" data-title="Repaso rápido">
+  <span class="tag">Repaso</span>
+  <h2>Antes de empezar: repaso rápido.</h2>
+  <p>Activa los conceptos que servirán de base para pilas y colas.</p>
+  <div class="grid">
+    <div class="card span-6">
+      <h3>Preguntas de repaso</h3>
+      <ul>
+        <li>¿Qué diferencia hay entre un arreglo y una lista enlazada?</li>
+        <li>¿Qué operación de una lista enlazada es O(1) al inicio?</li>
+        <li>¿Qué es un nodo y qué guarda además del dato?</li>
+        <li>¿Cómo se elimina el primer elemento de una lista simple?</li>
+        <li>¿Qué ventaja tiene una lista circular frente a una simple?</li>
+      </ul>
+    </div>
+    <div class="card span-6">
+      <h3>Autoevaluación rápida</h3>
+      <div class="quiz" data-quiz="entry">
+        <button class="btn option" data-answer="correct">En una pila, el último elemento en entrar es el primero en salir.</button>
+        <button class="btn option" data-answer="wrong">En una pila, el primer elemento insertado siempre se elimina primero.</button>
+        <button class="btn option" data-answer="wrong">Una cola atiende al último que llegó.</button>
+      </div>
+      <div class="answer" id="entryAnswer" aria-live="polite"></div>
+      <div class="note">✅ Sin nota. Solo para activar lo que ya sabes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · GLOSARIO MÍNIMO -->
+<section class="slide" data-title="Glosario mínimo">
+  <span class="tag">Vocabulario</span>
+  <h2>Antes de empezar: el vocabulario que usaremos.</h2>
+  <p>Este recorrido introduce varias palabras nuevas. Léelas una vez y vuelve a esta lista cuando tengas dudas.</p>
+  <div class="grid">
+    <div class="card span-6">
+      <div class="term"><b>Estructura lineal</b><span>Los elementos están ordenados uno tras otro, en una sola secuencia. Un arreglo y una lista enlazada son lineales.</span></div>
+      <div class="term"><b>Pila</b><span>Estructura lineal donde se inserta y se elimina por un solo extremo, llamado <b>tope</b>.</span></div>
+      <div class="term"><b>Tope</b><span>El extremo superior de la pila. Es el único punto por donde se entra y se sale. En inglés se llama <i>top</i>.</span></div>
+      <div class="term"><b>Cola</b><span>Estructura lineal donde se inserta por un extremo (<b>final</b>) y se elimina por el otro (<b>frente</b>).</span></div>
+      <div class="term"><b>Frente</b><span>El extremo por donde se saca de la cola. En inglés se llama <i>front</i>.</span></div>
+      <div class="term"><b>Final</b><span>El extremo por donde se inserta en la cola. En inglés se llama <i>rear</i>.</span></div>
+    </div>
+    <div class="card span-6">
+      <div class="term"><b>Último en entrar, primero en salir</b><span>Comportamiento de la pila. En inglés se abrevia <i>LIFO</i> (Last In, First Out).</span></div>
+      <div class="term"><b>Primero en entrar, primero en salir</b><span>Comportamiento de la cola. En inglés se abrevia <i>FIFO</i> (First In, First Out).</span></div>
+      <div class="term"><b>Desbordamiento (overflow)</b><span>Intentar insertar en una estructura que ya está llena (por ejemplo, una pila con capacidad fija).</span></div>
+      <div class="term"><b>Subdesbordamiento (underflow)</b><span>Intentar sacar de una estructura que está vacía.</span></div>
+      <div class="term"><b>O(1), O(n), O(log n)</b><span>Notación que indica cuánto tarda una operación: O(1) = tiempo constante (no depende del tamaño); O(n) = crece con el número de elementos; O(log n) = crece muy lentamente.</span></div>
+      <div class="term"><b>Nodo, head, tail, null</b><span>Recordatorio: un nodo guarda un dato y una referencia al siguiente; <code>head</code> es el primer nodo; <code>tail</code> el último; <code>null</code> significa "no hay nada".</span></div>
+    </div>
+  </div>
+  <div class="note">💡 <strong>Analogías:</strong> una pila es una torre de platos (solo puedes tomar el de arriba). Una cola es una fila del banco (el primero que llegó es el primero que es atendido).</div>
+</section>
+
+<!-- 5 · PILAS: CONCEPTO -->
+<section class="slide" data-title="Pilas: concepto">
+  <span class="tag">Teoría</span>
+  <h2>Pila: el último en entrar es el primero en salir.</h2>
+  <p>Una <span class="accent">pila</span> (en inglés, <i>stack</i>) es una <b>estructura lineal</b>: los elementos están ordenados uno tras otro. La diferencia con un arreglo es que en una pila las inserciones y eliminaciones ocurren en un <b>solo extremo</b>, llamado <b class="gold">tope</b>. Por eso su comportamiento se llama <b>LIFO</b> (<i>Last In, First Out</i>): el <b>último</b> en entrar es el <b>primero</b> en salir.</p>
+  <div class="grid">
+    <div class="card span-6">
+      <h3>Analogía</h3>
+      <p>Una torre de platos: solo puedes tomar el de arriba. El último que colocaste es el primero que retiras. No puedes sacar el plato de abajo sin quitar los de arriba.</p>
+      <div class="stack-wrap" id="introStack" aria-hidden="true">
+        <div class="stack-cell">18<small>base</small></div>
+        <div class="stack-cell">12<small></small></div>
+        <div class="stack-cell top">15<small>tope</small></div>
+      </div>
+    </div>
+    <div class="card span-6">
+      <h3>Operaciones básicas</h3>
+      <ul>
+        <li><b>push(x):</b> inserta x en el tope (meter).</li>
+        <li><b>pop():</b> elimina y devuelve el tope (sacar).</li>
+        <li><b>peek() / top():</b> consulta el tope sin eliminarlo (mirar).</li>
+        <li><b>isEmpty():</b> ¿está vacía?</li>
+        <li><b>size():</b> cantidad de elementos.</li>
+      </ul>
+      <div class="note">💡 Todas las operaciones sobre el tope son <strong>O(1)</strong>: no dependen de cuántos elementos haya.</div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card span-4"><h3>Usos típicos</h3><p>Deshacer/rehacer, evaluación de expresiones, llamadas a funciones, navegación atrás en el navegador.</p></div>
+    <div class="card span-4"><h3>Regla</h3><p>No se puede insertar ni eliminar en medio ni en la base sin sacar antes lo de arriba.</p></div>
+    <div class="card span-4"><h3>Error común</h3><p>Hacer <code>pop()</code> sobre una pila vacía: <b class="pink">subdesbordamiento (underflow)</b>.</p></div>
+  </div>
+</section>
+
+<!-- 6 · PILA CON ARREGLO -->
+<section class="slide" data-title="Pila con arreglo">
+  <span class="tag">Laboratorio</span>
+  <h2>Pila con arreglo: un índice que sube y baja.</h2>
+  <p>Usamos un arreglo de capacidad fija y un índice <code>top</code> que apunta a la próxima posición libre. Si <code>top</code> llega a la capacidad, la pila está <b class="pink">llena</b> (desbordamiento u <i>overflow</i>). Si <code>top</code> es 0, está <b class="pink">vacía</b> (subdesbordamiento o <i>underflow</i>).</p>
+  <div class="grid">
+    <div class="card span-7">
+      <h3 id="stackArrTitle">Capacidad 5 · pila vacía</h3>
+      <div class="stack-wrap" id="stackArr" role="img" aria-label="Representación visual de la pila"></div>
+      <div class="status" id="stackArrStatus" aria-live="polite">Pila vacía. Pulsa push para insertar.</div>
+      <div class="control-row">
+        <button class="btn primary" id="stackPush">push(99)</button>
+        <button class="btn" id="stackPop">pop()</button>
+        <button class="btn" id="stackPeek">peek()</button>
+        <button class="btn ghost" id="stackReset">Reiniciar</button>
+      </div>
+    </div>
+    <div class="card span-5">
+      <h3>Implementación</h3>
+      <div class="code"><pre><span class="kw">class</span> <span class="type">PilaArreglo</span>&lt;T&gt; {
+  <span class="kw">private</span> Object[] datos;
+  <span class="kw">private int</span> top; <span class="cm">// próximo libre</span>
+
+  <span class="method">PilaArreglo</span>(<span class="type">int</span> cap) {
+    datos = <span class="kw">new</span> Object[cap];
+    top = <span class="num">0</span>;
+  }
+
+  <span class="kw">void</span> <span class="method">push</span>(T x) {
+    <span class="kw">if</span> (top == datos.length)          <span class="cm">// pila llena</span>
+      <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"overflow"</span>);
+    datos[top++] = x;
+  }
+
+  T <span class="method">pop</span>() {
+    <span class="kw">if</span> (top == <span class="num">0</span>)                   <span class="cm">// pila vacía</span>
+      <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"underflow"</span>);
+    T x = (T) datos[--top];
+    datos[top] = <span class="kw">null</span>; <span class="cm">// liberar</span>
+    <span class="kw">return</span> x;
+  }
+
+  T <span class="method">peek</span>() {
+    <span class="kw">if</span> (top == <span class="num">0</span>) <span class="kw">return null</span>;
+    <span class="kw">return</span> (T) datos[top - <span class="num">1</span>];
+  }
+}</pre></div>
+      <div class="note">⚠️ <strong>Desbordamiento (overflow):</strong> <code>top == capacidad</code>. <strong>Subdesbordamiento (underflow):</strong> <code>top == 0</code>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · PILA DINÁMICA -->
+<section class="slide" data-title="Pila dinámica">
+  <span class="tag">Laboratorio</span>
+  <h2>Pila dinámica: el tope es la cabeza.</h2>
+  <p>Recordando lo esencial: un <b>nodo</b> guarda un dato y una referencia al siguiente; <code>head</code> es el primer nodo. Si usamos una lista enlazada simple como pila, el <b class="accent">tope</b> es la <code>head</code>. <code>push</code> inserta al inicio y <code>pop</code> elimina el primer nodo. Ambas operaciones son <b>O(1)</b>.</p>
+  <div class="grid">
+    <div class="card span-7">
+      <h3>Estado de la pila dinámica</h3>
+      <div class="queue-wrap" id="stackDyn" role="img" aria-label="Pila dinámica como lista enlazada"></div>
+      <div class="status" id="stackDynStatus" aria-live="polite">Pila vacía (head = null).</div>
+      <div class="control-row">
+        <button class="btn primary" id="dynPush">push(99)</button>
+        <button class="btn" id="dynPop">pop()</button>
+        <button class="btn ghost" id="dynReset">Reiniciar</button>
+      </div>
+    </div>
+    <div class="card span-5">
+      <h3>Implementación</h3>
+      <div class="code"><pre><span class="kw">class</span> <span class="type">Nodo</span>&lt;T&gt; {
+  T dato;
+  <span class="type">Nodo</span>&lt;T&gt; siguiente;
+  <span class="method">Nodo</span>(T d) { dato = d; }
+}
+
+<span class="kw">class</span> <span class="type">PilaDinamica</span>&lt;T&gt; {
+  <span class="kw">private</span> <span class="type">Nodo</span>&lt;T&gt; head; <span class="cm">// tope</span>
+  <span class="kw">private int</span> size;
+
+  <span class="kw">void</span> <span class="method">push</span>(T x) {
+    <span class="type">Nodo</span>&lt;T&gt; n = <span class="kw">new</span> <span class="type">Nodo</span>&lt;&gt;(x);
+    n.siguiente = head;
+    head = n;
+    size++;
+  }
+
+  T <span class="method">pop</span>() {
+    <span class="kw">if</span> (head == <span class="kw">null</span>) <span class="kw">return null</span>;
+    T x = head.dato;
+    head = head.siguiente;
+    size--;
+    <span class="kw">return</span> x;
+  }
+
+  T <span class="method">peek</span>() {
+    <span class="kw">return</span> head == <span class="kw">null</span> ? <span class="kw">null</span> : head.dato;
+  }
+}</pre></div>
+    </div>
+  </div>
+  <div class="note">💡 <strong>Ventaja:</strong> no hay límite fijo de capacidad, así que no hay desbordamiento por tamaño. <strong>Costo:</strong> cada nodo ocupa más memoria que una celda de arreglo.</div>
+</section>
+
+<!-- 8 · COLAS: CONCEPTO -->
+<section class="slide" data-title="Colas: concepto">
+  <span class="tag">Teoría</span>
+  <h2>Cola: el primero en entrar es el primero en salir.</h2>
+  <p>Una <span class="accent">cola</span> (en inglés, <i>queue</i>) es una estructura lineal en la que se inserta por un extremo llamado <b class="gold">final</b> (en inglés, <i>rear</i>) y se elimina por el otro extremo llamado <b class="gold">frente</b> (en inglés, <i>front</i>). Su comportamiento se llama <b>FIFO</b> (<i>First In, First Out</i>): el <b>primero</b> en entrar es el <b>primero</b> en salir.</p>
+  <div class="grid">
+    <div class="card span-6">
+      <h3>Analogía</h3>
+      <p>Una fila del banco: el primero que llegó es el primero que es atendido. Nadie se cuela por el medio.</p>
+      <div class="queue-wrap" id="introQueue" aria-hidden="true">
+        <div class="qcell front">18<small>frente</small></div>
+        <div class="qcell">12<small></small></div>
+        <div class="qcell rear">15<small>final</small></div>
+      </div>
+      <div class="control-row"><span class="marker">← se atiende por el frente</span><span class="marker">se inserta por el final →</span></div>
+    </div>
+    <div class="card span-6">
+      <h3>Operaciones básicas</h3>
+      <ul>
+        <li><b>enqueue(x):</b> inserta x al final (encolar).</li>
+        <li><b>dequeue():</b> elimina y devuelve el frente (desencolar).</li>
+        <li><b>front() / peek():</b> consulta el frente sin eliminarlo.</li>
+        <li><b>isEmpty():</b> ¿está vacía?</li>
+        <li><b>size():</b> cantidad de elementos.</li>
+      </ul>
+      <div class="note">💡 <code>enqueue</code> y <code>dequeue</code> bien implementados son <strong>O(1)</strong>.</div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card span-4"><h3>Usos típicos</h3><p>Turnos, impresión, <b>buffers</b> (memorias temporales que guardan datos mientras se procesan), recorrido <b>BFS</b> (búsqueda en anchura: visitar primero los vecinos más cercanos).</p></div>
+    <div class="card span-4"><h3>Regla</h3><p>No se accede al medio: solo al frente para eliminar y al final para insertar.</p></div>
+    <div class="card span-4"><h3>Error común</h3><p><code>dequeue()</code> sobre cola vacía: <b class="pink">subdesbordamiento (underflow)</b>.</p></div>
+  </div>
+</section>
+
+<!-- 9 · COLA CIRCULAR -->
+<section class="slide" data-title="Cola circular">
+  <span class="tag">Laboratorio</span>
+  <h2>Cola con arreglo: cuidado con el desperdicio.</h2>
+  <p>Si solo avanzamos los índices <code>front</code> (frente) y <code>rear</code> (final) sin volver al inicio, el arreglo se "gasta": las primeras posiciones quedan vacías para siempre. La solución es una <span class="accent">cola circular</span>: cuando un índice llega al final del arreglo, vuelve a 0. Eso se logra con el <b>operador módulo</b> (<code>%</code>): <code>(i + 1) % capacidad</code> da 0 cuando <code>i</code> es la última posición.</p>
+  <div class="grid">
+    <div class="card span-7">
+      <h3>Cola circular (capacidad 6)</h3>
+      <div class="queue-wrap" id="circQueue" role="img" aria-label="Cola circular"></div>
+      <div class="status" id="circQueueStatus" aria-live="polite">Cola vacía (frente = final = 0).</div>
+      <div class="control-row">
+        <button class="btn primary" id="cqEnqueue">enqueue(99)</button>
+        <button class="btn" id="cqDequeue">dequeue()</button>
+        <button class="btn ghost" id="cqReset">Reiniciar</button>
+      </div>
+    </div>
+    <div class="card span-5">
+      <h3>Implementación</h3>
+      <div class="code"><pre><span class="kw">class</span> <span class="type">ColaCircular</span>&lt;T&gt; {
+  <span class="kw">private</span> Object[] datos;
+  <span class="kw">private int</span> front, rear, size;
+
+  <span class="method">ColaCircular</span>(<span class="type">int</span> cap) {
+    datos = <span class="kw">new</span> Object[cap];
+    front = rear = size = <span class="num">0</span>;
+  }
+
+  <span class="kw">void</span> <span class="method">enqueue</span>(T x) {
+    <span class="kw">if</span> (size == datos.length)       <span class="cm">// cola llena</span>
+      <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"llena"</span>);
+    datos[rear] = x;
+    rear = (rear + <span class="num">1</span>) % datos.length; <span class="cm">// vuelve a 0 si llega al final</span>
+    size++;
+  }
+
+  T <span class="method">dequeue</span>() {
+    <span class="kw">if</span> (size == <span class="num">0</span>)                <span class="cm">// cola vacía</span>
+      <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"vacía"</span>);
+    T x = (T) datos[front];
+    datos[front] = <span class="kw">null</span>;
+    front = (front + <span class="num">1</span>) % datos.length;
+    size--;
+    <span class="kw">return</span> x;
+  }
+
+  T <span class="method">front</span>() {
+    <span class="kw">return</span> size == <span class="num">0</span> ? <span class="kw">null</span> : (T) datos[front];
+  }
+}</pre></div>
+    </div>
+  </div>
+  <div class="note">⚠️ <strong>Regla de oro:</strong> usa <code>size</code> para distinguir "llena" de "vacía". Si comparas solo <code>front == rear</code>, ambos estados son indistinguibles (en ambos casos los índices coinciden).</div>
+</section>
+
+<!-- 10 · COLA DINÁMICA -->
+<section class="slide" data-title="Cola dinámica">
+  <span class="tag">Laboratorio</span>
+  <h2>Cola dinámica: dos referencias, dos extremos.</h2>
+  <p>Recordando lo esencial: <code>head</code> es el primer nodo y <code>tail</code> el último. Con una lista simple, <code>head</code> es el <b class="accent">frente</b> (por donde se saca) y <code>tail</code> es el <b class="gold">final</b> (por donde se inserta). Así <code>enqueue</code> y <code>dequeue</code> son <b>O(1)</b>.</p>
+  <div class="grid">
+    <div class="card span-7">
+      <h3>Estado de la cola dinámica</h3>
+      <div class="queue-wrap" id="dynQueue" role="img" aria-label="Cola dinámica como lista enlazada"></div>
+      <div class="status" id="dynQueueStatus" aria-live="polite">Cola vacía (head = tail = null).</div>
+      <div class="control-row">
+        <button class="btn primary" id="dqEnqueue">enqueue(99)</button>
+        <button class="btn" id="dqDequeue">dequeue()</button>
+        <button class="btn ghost" id="dqReset">Reiniciar</button>
+      </div>
+    </div>
+    <div class="card span-5">
+      <h3>Implementación</h3>
+      <div class="code"><pre><span class="kw">class</span> <span class="type">ColaDinamica</span>&lt;T&gt; {
+  <span class="kw">private</span> <span class="type">Nodo</span>&lt;T&gt; head, tail;
+  <span class="kw">private int</span> size;
+
+  <span class="kw">void</span> <span class="method">enqueue</span>(T x) {
+    <span class="type">Nodo</span>&lt;T&gt; n = <span class="kw">new</span> <span class="type">Nodo</span>&lt;&gt;(x);
+    <span class="kw">if</span> (head == <span class="kw">null</span>) { head = tail = n; }
+    <span class="kw">else</span> { tail.siguiente = n; tail = n; }
+    size++;
+  }
+
+  T <span class="method">dequeue</span>() {
+    <span class="kw">if</span> (head == <span class="kw">null</span>) <span class="kw">return null</span>;
+    T x = head.dato;
+    head = head.siguiente;
+    <span class="kw">if</span> (head == <span class="kw">null</span>) tail = <span class="kw">null</span>; <span class="cm">// cola quedó vacía</span>
+    size--;
+    <span class="kw">return</span> x;
+  }
+
+  T <span class="method">front</span>() {
+    <span class="kw">return</span> head == <span class="kw">null</span> ? <span class="kw">null</span> : head.dato;
+  }
+}</pre></div>
+    </div>
+  </div>
+  <div class="note">💡 <strong>Detalle:</strong> al eliminar el último nodo hay que poner <code>tail = null</code>; si no, <code>tail</code> queda apuntando a un nodo fuera de la lista.</div>
+</section>
+
+<!-- 11 · COLAS CON PRIORIDAD -->
+<section class="slide" data-title="Colas con prioridad">
+  <span class="tag">Teoría y práctica</span>
+  <h2>Cola con prioridad: no siempre gana el primero.</h2>
+  <p>En una <span class="accent">cola con prioridad</span>, cada elemento tiene una prioridad. Al hacer <code>dequeue</code>, sale el de <b>mayor prioridad</b>; si hay empate, sale el más antiguo (FIFO entre iguales). No es una cola FIFO pura: el orden de salida depende de la prioridad, no solo del orden de llegada.</p>
+  <div class="grid">
+    <div class="card span-7">
+      <h3>Simulación</h3>
+      <div id="prioBox" style="margin-top:8px"></div>
+      <div class="status" id="prioStatus" aria-live="polite">Cola vacía. Inserta elementos con prioridad.</div>
+      <div class="control-row">
+        <button class="btn primary" id="prioEnqHigh">enqueue("urgente", alta)</button>
+        <button class="btn" id="prioEnqMid">enqueue("normal", media)</button>
+        <button class="btn" id="prioEnqLow">enqueue("diferido", baja)</button>
+        <button class="btn" id="prioDeq">dequeue()</button>
+        <button class="btn ghost" id="prioReset">Reiniciar</button>
+      </div>
+    </div>
+    <div class="card span-5">
+      <h3>Implementaciones</h3>
+      <ul>
+        <li><b>Lista ordenada:</b> insertar mantiene orden por prioridad; dequeue O(1).</li>
+        <li><b>Montículo (heap):</b> un árbol binario especial donde el padre siempre es mayor (o menor) que sus hijos; permite insertar y extraer en O(log n). Es la base de <code>PriorityQueue</code> en Java.</li>
+        <li><b>Lista desordenada:</b> inserción O(1), dequeue O(n) buscando el máximo.</li>
+      </ul>
+      <div class="code"><pre><span class="cm">// PriorityQueue: cola con prioridad de la librería Java</span>
+<span class="kw">var</span> pq = <span class="kw">new</span> <span class="type">PriorityQueue</span>&lt;<span class="type">Tarea</span>&gt;(
+  <span class="type">Comparator</span>.comparingInt(t -&gt; -t.prioridad)); <span class="cm">// mayor prioridad primero</span>
+pq.add(<span class="kw">new</span> <span class="type">Tarea</span>(<span class="str">"A"</span>, <span class="num">1</span>));
+pq.add(<span class="kw">new</span> <span class="type">Tarea</span>(<span class="str">"B"</span>, <span class="num">3</span>));
+pq.poll(); <span class="cm">// devuelve B (prioridad 3)</span></pre></div>
+    </div>
+  </div>
+  <div class="note">💡 <strong>Ejemplo real:</strong> una sala de emergencias atiende primero al paciente crítico, no al que llegó antes. Eso es una cola con prioridad.</div>
+</section>
+
+<!-- 12 · COMPARATIVA -->
+<section class="slide" data-title="Comparativa">
+  <span class="tag">Síntesis</span>
+  <h2>Pila vs. cola: mismo almacenamiento, distinto orden.</h2>
+  <div class="grid">
+    <div class="card span-6">
+      <h3>Pila (último en entrar, primero en salir)</h3>
+      <ul>
+        <li>Inserción y eliminación en el <b class="accent">mismo</b> extremo (tope).</li>
+        <li><code>push</code> y <code>pop</code> en O(1).</li>
+        <li>Usos: deshacer, recursión, evaluación de expresiones.</li>
+        <li>Error típico: underflow al hacer <code>pop</code> en vacía.</li>
+      </ul>
+    </div>
+    <div class="card span-6">
+      <h3>Cola (primero en entrar, primero en salir)</h3>
+      <ul>
+        <li>Inserción en el <b class="gold">final</b>, eliminación en el <b class="gold">frente</b>.</li>
+        <li><code>enqueue</code> y <code>dequeue</code> en O(1) con <code>tail</code> o arreglo circular.</li>
+        <li>Usos: turnos, buffers, BFS.</li>
+        <li>Error típico: underflow al hacer <code>dequeue</code> en vacía.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card">
+    <div class="flow">
+      <div class="flow-step"><b class="accent">Pila</b><p>El último que llegó es el primero en salir.</p></div>
+      <div class="flow-step"><b class="gold">Cola</b><p>El primero que llegó es el primero en salir.</p></div>
+      <div class="flow-step"><b class="pink">Prioridad</b><p>Sale el de mayor prioridad, no el más antiguo.</p></div>
+    </div>
+  </div>
+  <div class="note">📌 En ambos casos, la clave está en <strong>restringir el acceso</strong>: pilas y colas son TAD (Tipo Abstracto de Datos) cuyas operaciones están limitadas a los extremos.</div>
+</section>
+
+<!-- 13 · APLICACIÓN: PARÉNTESIS -->
+<section class="slide" data-title="Aplicación: paréntesis">
+  <span class="tag">Aplicación</span>
+  <h2>Una pila resuelve los paréntesis balanceados.</h2>
+  <p>Recorre la expresión: si ves <code>(</code>, <code>[</code> o <code>{</code>, lo apilas; si ves un cierre, desapilas y verificas que coincida. Al final, la pila debe quedar vacía.</p>
+  <div class="grid">
+    <div class="card span-7">
+      <h3>Expresión: <code id="exprText">{[()]}</code></h3>
+      <div class="queue-wrap" id="parenVis" role="img" aria-label="Pila de paréntesis"></div>
+      <div class="status" id="parenStatus" aria-live="polite">Pulsa "Siguiente carácter" para procesar.</div>
+      <div class="control-row">
+        <button class="btn primary" id="parenNext">Siguiente carácter</button>
+        <button class="btn ghost" id="parenReset">Reiniciar</button>
+      </div>
+    </div>
+    <div class="card span-5">
+      <div class="code"><pre><span class="cm">// Deque = "double-ended queue" (cola doble).
+// ArrayDeque es una implementación de Deque basada en arreglo.
+// Se usa como pila porque tiene push/pop.</span>
+<span class="kw">boolean</span> <span class="method">balanceado</span>(<span class="type">String</span> s) {
+  <span class="type">Deque</span>&lt;<span class="type">Character</span>&gt; pila = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+  <span class="kw">for</span> (<span class="kw">char</span> c : s.toCharArray()) {
+    <span class="kw">if</span> (c == <span class="str">'('</span> || c == <span class="str">'['</span> || c == <span class="str">'{'</span>)
+      pila.push(c);
+    <span class="kw">else if</span> (c == <span class="str">')'</span> || c == <span class="str">']'</span> || c == <span class="str">'}'</span>) {
+      <span class="kw">if</span> (pila.isEmpty()) <span class="kw">return false</span>;
+      <span class="kw">char</span> a = pila.pop();
+      <span class="kw">if</span> (!coincide(a, c)) <span class="kw">return false</span>;
+    }
+  }
+  <span class="kw">return</span> pila.isEmpty();
+}</pre></div>
+      <div class="note">✅ Complejidad: <b>O(n)</b> en tiempo (se recorre cada carácter una vez) y <b>O(n)</b> en espacio en el peor caso.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 · APLICACIÓN: TURNO -->
+<section class="slide" data-title="Aplicación: turno">
+  <span class="tag">Aplicación</span>
+  <h2>Una cola atiende turnos en orden de llegada.</h2>
+  <p>Simulamos una fila de atención: los clientes llegan y se atienden. El primero en llegar es el primero en salir.</p>
+  <div class="grid">
+    <div class="card span-7">
+      <div class="queue-wrap" id="turnoVis" role="img" aria-label="Cola de turnos"></div>
+      <div class="status" id="turnoStatus" aria-live="polite">Cola vacía. Pulsa "Llega cliente" para iniciar.</div>
+      <div class="control-row">
+        <button class="btn primary" id="turnoLlega">Llega cliente</button>
+        <button class="btn" id="turnoAtiende">Atender</button>
+        <button class="btn ghost" id="turnoReset">Reiniciar</button>
+      </div>
+    </div>
+    <div class="card span-5">
+      <h3>Reglas de la simulación</h3>
+      <ul>
+        <li>Cada "Llega cliente" crea un turno con número creciente.</li>
+        <li>Cada "Atender" hace <code>dequeue</code> y muestra el turno atendido.</li>
+        <li>Si la cola está vacía, "Atender" reporta underflow (subdesbordamiento).</li>
+      </ul>
+      <div class="note">💡 Este patrón es la base de sistemas de tickets, impresión y buffers de red.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 · RETO -->
+<section class="slide" data-title="Reto">
+  <span class="tag">Caso integrador</span>
+  <h2>Reto: editor con deshacer y rehacer.</h2>
+  <p>Implementa un editor simple: cada cambio se apila en la pila <code>deshacer</code>; al deshacer, el estado se mueve a la pila <code>rehacer</code>. Al rehacer, vuelve a <code>deshacer</code>.</p>
+  <div class="grid">
+    <div class="card span-5">
+      <h3>Plan de solución</h3>
+      <div class="flow">
+        <div class="flow-step"><b>1</b><p>Dos pilas: <code>deshacer</code> y <code>rehacer</code>.</p></div>
+        <div class="flow-step"><b>2</b><p>Cada acción se apila en <code>deshacer</code> y limpia <code>rehacer</code>.</p></div>
+        <div class="flow-step"><b>3</b><p>Deshacer mueve de <code>deshacer</code> a <code>rehacer</code>.</p></div>
+      </div>
+      <div class="quiz" data-quiz="reto">
+        <button class="btn option" data-answer="wrong">¿Usar una sola pila para deshacer y rehacer?</button>
+        <button class="btn option" data-answer="correct">¿Dos pilas: una para deshacer y otra para rehacer?</button>
+        <button class="btn option" data-answer="wrong">¿Una cola FIFO para los cambios?</button>
+      </div>
+      <div class="answer" id="retoAnswer" aria-live="polite"></div>
+    </div>
+    <div class="card span-7">
+      <div class="code"><pre><span class="kw">class</span> <span class="type">Editor</span> {
+  <span class="kw">private</span> <span class="type">Deque</span>&lt;<span class="type">String</span>&gt; deshacer = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+  <span class="kw">private</span> <span class="type">Deque</span>&lt;<span class="type">String</span>&gt; rehacer  = <span class="kw">new</span> <span class="type">ArrayDeque</span>&lt;&gt;();
+  <span class="kw">private</span> <span class="type">String</span> actual = <span class="str">""</span>;
+
+  <span class="kw">void</span> <span class="method">escribir</span>(<span class="type">String</span> s) {
+    deshacer.push(actual);   <span class="cm">// guardar estado anterior</span>
+    rehacer.clear();         <span class="cm">// al escribir, se pierde el rehacer</span>
+    actual += s;
+  }
+
+  <span class="kw">void</span> <span class="method">deshacerAccion</span>() {
+    <span class="kw">if</span> (deshacer.isEmpty()) <span class="kw">return</span>;
+    rehacer.push(actual);
+    actual = deshacer.pop();
+  }
+
+  <span class="kw">void</span> <span class="method">rehacerAccion</span>() {
+    <span class="kw">if</span> (rehacer.isEmpty()) <span class="kw">return</span>;
+    deshacer.push(actual);
+    actual = rehacer.pop();
+  }
+}</pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 · CHECKLIST -->
+<section class="slide" data-title="Checklist">
+  <span class="tag">Cierre del reto</span>
+  <h2>Antes de dar por terminada tu solución.</h2>
+  <p>Usa esta lista para revisar tu implementación.</p>
+  <div class="grid">
+    <div class="card span-6">
+      <h3>Corrección funcional</h3>
+      <ul>
+        <li>¿Probaste pila/cola vacía, un elemento, llena?</li>
+        <li>¿<code>pop</code>/<code>dequeue</code> sobre vacía lanza excepción o devuelve <code>null</code> según el contrato?</li>
+        <li>¿La cola circular usa <code>size</code> y módulo correctamente?</li>
+        <li>¿La cola dinámica actualiza <code>tail = null</code> al vaciarse?</li>
+        <li>¿La cola con prioridad respeta el orden entre iguales?</li>
+      </ul>
+    </div>
+    <div class="card span-6">
+      <h3>Claridad y justificación</h3>
+      <ul>
+        <li>¿Explicas por qué elegiste arreglo o lista enlazada?</li>
+        <li>¿Indicas la complejidad de cada operación?</li>
+        <li>¿El TAD está separado de la implementación?</li>
+        <li>¿Los nombres de variables describen su contenido?</li>
+        <li>¿Incluyes ejemplos de ejecución con salida esperada?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note">📝 <strong>Consejo:</strong> antes de entregar, prueba tu código con pilas y colas vacías, con un solo elemento y llenas. Los tres casos extremos son donde aparecen casi todos los errores.</div>
+</section>
+
+<!-- 17 · REPASO -->
+<section class="slide" data-title="Repaso">
+  <span class="tag">Repaso</span>
+  <h2>La restricción de acceso es la que define la estructura.</h2>
+  <p>Pilas y colas no son "arreglos con otro nombre": son TAD cuyo contrato limita las operaciones a los extremos. Esa restricción es lo que las hace útiles.</p>
+  <div class="card">
+    <div class="flow">
+      <div class="flow-step"><b class="accent">Pila push/pop</b><p>O(1)</p></div>
+      <div class="flow-step"><b class="gold">Cola enqueue/dequeue</b><p>O(1)</p></div>
+      <div class="flow-step"><b class="pink">Cola con prioridad</b><p>O(log n) con montículo</p></div>
+      <div class="flow-step"><b class="green">Búsqueda en pila/cola</b><p>O(n), no es su propósito</p></div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card span-6">
+      <h3>Errores a evitar</h3>
+      <ul>
+        <li><b>Desbordamiento (overflow):</b> insertar en una estructura llena.</li>
+        <li><b>Subdesbordamiento (underflow):</b> sacar de una estructura vacía.</li>
+        <li><b>Confundir frente y final:</b> se saca por el frente, se inserta por el final.</li>
+      </ul>
+    </div>
+    <div class="card span-6">
+      <h3>Antes de dar por terminado</h3>
+      <ul>
+        <li>Prueba vacía, un elemento y llena.</li>
+        <li>Verifica índices y <code>null</code>.</li>
+        <li>Explica la complejidad de cada operación.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 18 · CIERRE -->
+<section class="slide" data-title="Cierre">
+  <div class="hero">
+    <span class="tag">Salida</span>
+    <h2>Ya puedes elegir entre pila y cola con criterio.</h2>
+    <p class="lead">Este recorrido termina cuando puedes justificar la elección de una pila o una cola, visualizar sus extremos y escribir operaciones correctas sobre arreglos y listas enlazadas.</p>
+  </div>
+  <div class="grid">
+    <div class="card span-4"><div class="big-number accent">✓</div><h3>Teoría</h3><p>Distingues último-en-entrar-primero-en-salir, primero-en-entrar-primero-en-salir y prioridad.</p></div>
+    <div class="card span-4"><div class="big-number gold">✓</div><h3>Algoritmos</h3><p>Describes operaciones y sus costos.</p></div>
+    <div class="card span-4"><div class="big-number pink">✓</div><h3>Java</h3><p>Implementas pilas y colas con arreglos y listas.</p></div>
+  </div>
+  <div class="card">
+    <h3>Próximos temas: árboles, ABB y AVL</h3>
+    <div class="flow">
+      <div class="flow-step"><b class="accent">Árboles</b><p>Terminología y representación.</p></div>
+      <div class="flow-step"><b class="gold">ABB</b><p>Búsqueda, inserción, eliminación.</p></div>
+      <div class="flow-step"><b class="pink">AVL</b><p>Rotaciones y balanceo.</p></div>
+    </div>
+  </div>
+  <div class="control-row"><button class="btn primary" id="restart">↺ Volver al inicio</button></div>
+</section>
+
+<nav class="footer-nav">
+  <button class="btn ghost" id="prev">← Anterior</button>
+  <span class="counter" id="counter">Inicio</span>
+  <button class="btn primary" id="next">Siguiente →</button>
+</nav>
+</main>
+
+<script>
+/* ========= Navegación ========= */
+const slides=[...document.querySelectorAll('.slide')];let current=0;
+const bar=document.querySelector('#bar'),progressText=document.querySelector('#progressText');
+const counter=document.querySelector('#counter'),prevBtn=document.querySelector('#prev'),nextBtn=document.querySelector('#next');
+function render(){
+  slides.forEach((s,i)=>s.classList.toggle('active',i===current));
+  progressText.textContent=`${current+1} / ${slides.length}`;
+  bar.style.width=`${((current+1)/slides.length)*100}%`;
+  counter.textContent=slides[current].dataset.title;
+  prevBtn.disabled=current===0;
+  nextBtn.disabled=current===slides.length-1;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function go(d){current=Math.max(0,Math.min(slides.length-1,current+d));render()}
+prevBtn.onclick=()=>go(-1);
+nextBtn.onclick=()=>go(1);
+document.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>go(1));
+document.querySelector('#restart').onclick=()=>{current=0;render()};
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1)});
+
+/* ========= Quizzes: delegación unificada ========= */
+document.querySelectorAll('.quiz').forEach(quiz=>{
+  quiz.addEventListener('click',e=>{
+    const b=e.target.closest('.option'); if(!b) return;
+    quiz.querySelectorAll('.option').forEach(x=>x.classList.remove('correct','wrong'));
+    b.classList.add(b.dataset.answer);
+    const ansId=quiz.dataset.quiz==='entry'?'#entryAnswer':'#retoAnswer';
+    const ans=document.querySelector(ansId);
+    if(ans){
+      if(quiz.dataset.quiz==='entry'){
+        ans.textContent=b.dataset.answer==='correct'
+          ?'Correcto: en una pila el último en entrar es el primero en salir.'
+          :'Revisa: en una pila el último en entrar sale primero; en una cola el primero en entrar sale primero.';
+      }else{
+        ans.textContent=b.dataset.answer==='correct'
+          ?'Correcto: dos pilas separan el historial de deshacer y el de rehacer.'
+          :'Pista: piensa qué necesita guardar el editor para poder volver atrás y luego adelante.';
+      }
+    }
+  });
+});
+
+/* ========= Utilidad: construir celdas de pila ========= */
+function renderStack(container, values, cap, opts={}){
+  container.innerHTML='';
+  const {topIndex=values.length-1, insertedIdx=-1, removedIdx=-1, showEmptySlots=false}=opts;
+  for(let i=0;i<cap;i++){
+    const has=i<values.length;
+    const cell=document.createElement('div');
+    let cls='stack-cell';
+    if(!has){
+      if(!showEmptySlots) continue;
+      cls+=' empty';
+    }else{
+      if(i===topIndex) cls+=' top';
+      if(i===insertedIdx) cls+=' inserted';
+      if(i===removedIdx) cls+=' removed';
+    }
+    cell.className=cls;
+    cell.setAttribute('role','listitem');
+    cell.innerHTML=has
+      ? `${values[i]}<small>${i===topIndex?'tope':''}</small>`
+      : `·<small></small>`;
+    container.appendChild(cell);
+  }
+}
+
+/* ========= Pila con arreglo ========= */
+(function(){
+  const cap=5;
+  let data=[];
+  const stack=document.querySelector('#stackArr');
+  const status=document.querySelector('#stackArrStatus');
+  const title=document.querySelector('#stackArrTitle');
+  let flash='';
+  function draw(){
+    renderStack(stack,data,cap,{showEmptySlots:true, insertedIdx:flash==='push'?data.length-1:-1, removedIdx:-1});
+    title.textContent=`Capacidad ${cap} · ${data.length} elemento${data.length!==1?'s':''}`;
+  }
+  function setStatus(msg){status.textContent=msg;}
+  function reset(){data=[];flash='';draw();setStatus('Pila vacía. Pulsa push para insertar.');}
+  document.querySelector('#stackPush').onclick=()=>{
+    if(data.length>=cap){setStatus('⚠️ Desbordamiento (overflow): la pila está llena.');return;}
+    data.push(99);flash='push';draw();
+    setStatus(`push(99): 99 se coloca en la posición ${data.length-1}. top = ${data.length}. O(1).`);
+    flash='';
+  };
+  document.querySelector('#stackPop').onclick=()=>{
+    if(data.length===0){setStatus('⚠️ Subdesbordamiento (underflow): no se puede hacer pop en pila vacía.');return;}
+    const v=data[data.length-1];
+    renderStack(stack,data,cap,{showEmptySlots:true, removedIdx:data.length-1});
+    data.pop();
+    setStatus(`pop(): se elimina ${v} del tope. top = ${data.length}. O(1).`);
+    setTimeout(()=>{draw();},350);
+  };
+  document.querySelector('#stackPeek').onclick=()=>{
+    if(data.length===0){setStatus('peek(): pila vacía, no hay tope.');return;}
+    setStatus(`peek(): el tope es ${data[data.length-1]}. No se modifica la pila. O(1).`);
+  };
+  document.querySelector('#stackReset').onclick=reset;
+  reset();
+})();
+
+/* ========= Pila dinámica ========= */
+(function(){
+  let data=[];
+  const box=document.querySelector('#stackDyn');
+  const status=document.querySelector('#stackDynStatus');
+  function draw(opts={}){
+    box.innerHTML='';
+    if(data.length===0){
+      const empty=document.createElement('div');
+      empty.className='qcell empty';
+      empty.textContent='∅';
+      box.appendChild(empty);
+      return;
+    }
+    data.forEach((v,i)=>{
+      const c=document.createElement('div');
+      let cls='qcell';
+      if(i===0) cls+=' front';
+      if(opts.insertedIdx===i) cls+=' inserted';
+      if(opts.removedIdx===i) cls+=' removed';
+      c.className=cls;
+      c.innerHTML=`${v}<small>${i===0?'tope=head':'nodo '+(i+1)}</small>`;
+      box.appendChild(c);
+      if(i<data.length-1){
+        const arrow=document.createElement('span');
+        arrow.textContent='→'; arrow.style.color='var(--cyan)'; arrow.style.fontWeight='800';
+        box.appendChild(arrow);
+      }
+    });
+  }
+  function setStatus(m){status.textContent=m;}
+  document.querySelector('#dynPush').onclick=()=>{
+    data.unshift(99);
+    draw({insertedIdx:0});
+    setStatus('push(99): nuevo nodo al inicio. head apunta a 99. O(1).');
+  };
+  document.querySelector('#dynPop').onclick=()=>{
+    if(data.length===0){setStatus('⚠️ Subdesbordamiento: pila vacía (head == null).');return;}
+    const v=data[0];
+    draw({removedIdx:0});
+    data.shift();
+    setStatus(`pop(): se elimina el nodo ${v} del tope. head avanza al siguiente. O(1).`);
+    setTimeout(()=>draw(),350);
+  };
+  document.querySelector('#dynReset').onclick=()=>{
+    data=[];draw();setStatus('Pila vacía (head = null).');
+  };
+  draw();
+})();
+
+/* ========= Cola circular ========= */
+(function(){
+  const cap=6;
+  let slots=Array(cap).fill(null);
+  let front=0, rear=0, size=0;
+  const box=document.querySelector('#circQueue');
+  const status=document.querySelector('#circQueueStatus');
+  let flash='';
+  function draw(){
+    box.innerHTML='';
+    for(let i=0;i<cap;i++){
+      const c=document.createElement('div');
+      let cls='qcell';
+      if(slots[i]===null) cls+=' empty';
+      if(size>0 && i===front) cls+=' front';
+      if(size>0 && i===(rear-1+cap)%cap) cls+=' rear';
+      if(flash==='enq' && i===(rear-1+cap)%cap) cls+=' inserted';
+      if(flash==='deq' && i===(front-1+cap)%cap) cls+=' removed';
+      c.className=cls;
+      c.innerHTML=`${slots[i]??'·'}<small>${i}</small>`;
+      box.appendChild(c);
+    }
+  }
+  function setStatus(m){status.textContent=m;}
+  document.querySelector('#cqEnqueue').onclick=()=>{
+    if(size===cap){setStatus('⚠️ Cola llena: size == capacidad.');return;}
+    slots[rear]=99; rear=(rear+1)%cap; size++; flash='enq'; draw();
+    setStatus(`enqueue(99): se inserta en la posición ${(rear-1+cap)%cap}. rear ahora es ${rear}. size=${size}. O(1).`);
+    flash='';
+  };
+  document.querySelector('#cqDequeue').onclick=()=>{
+    if(size===0){setStatus('⚠️ Subdesbordamiento: cola vacía (size == 0).');return;}
+    const v=slots[front]; slots[front]=null; front=(front+1)%cap; size--; flash='deq'; draw();
+    setStatus(`dequeue(): sale ${v} por el frente (posición ${(front-1+cap)%cap}). front ahora es ${front}. size=${size}. O(1).`);
+    flash='';
+  };
+  document.querySelector('#cqReset').onclick=()=>{
+    slots=Array(cap).fill(null); front=rear=size=0; flash=''; draw();
+    setStatus('Cola vacía (frente = final = 0).');
+  };
+  draw();
+})();
+
+/* ========= Cola dinámica ========= */
+(function(){
+  let data=[];
+  const box=document.querySelector('#dynQueue');
+  const status=document.querySelector('#dynQueueStatus');
+  function draw(opts={}){
+    box.innerHTML='';
+    if(data.length===0){
+      const e=document.createElement('div'); e.className='qcell empty'; e.textContent='∅'; box.appendChild(e); return;
+    }
+    data.forEach((v,i)=>{
+      const c=document.createElement('div');
+      let cls='qcell';
+      if(i===0) cls+=' front';
+      if(i===data.length-1) cls+=' rear';
+      if(opts.insertedIdx===i) cls+=' inserted';
+      if(opts.removedIdx===i) cls+=' removed';
+      c.className=cls;
+      const label=i===0?'frente=head':(i===data.length-1?'final=tail':'nodo '+(i+1));
+      c.innerHTML=`${v}<small>${label}</small>`;
+      box.appendChild(c);
+      if(i<data.length-1){
+        const a=document.createElement('span'); a.textContent='→'; a.style.color='var(--cyan)'; a.style.fontWeight='800'; box.appendChild(a);
+      }
+    });
+  }
+  function setStatus(m){status.textContent=m;}
+  document.querySelector('#dqEnqueue').onclick=()=>{
+    data.push(99); draw({insertedIdx:data.length-1});
+    setStatus('enqueue(99): nuevo nodo al final. tail apunta a 99. O(1).');
+  };
+  document.querySelector('#dqDequeue').onclick=()=>{
+    if(data.length===0){setStatus('⚠️ Subdesbordamiento: cola vacía (head == null).');return;}
+    const v=data[0]; draw({removedIdx:0}); data.shift();
+    setStatus(`dequeue(): sale ${v} por el frente. head avanza. ${data.length===0?'tail = null.':''} O(1).`);
+    setTimeout(()=>draw(),350);
+  };
+  document.querySelector('#dqReset').onclick=()=>{
+    data=[]; draw(); setStatus('Cola vacía (head = tail = null).');
+  };
+  draw();
+})();
+
+/* ========= Cola con prioridad ========= */
+(function(){
+  let items=[];
+  let seq=0;
+  const box=document.querySelector('#prioBox');
+  const status=document.querySelector('#prioStatus');
+  const labels={3:'alta',2:'media',1:'baja'};
+  const cls={3:'high',2:'mid',1:'low'};
+  function draw(){
+    box.innerHTML='';
+    if(items.length===0){
+      const p=document.createElement('p'); p.className='muted'; p.textContent='(cola vacía)'; box.appendChild(p); return;
+    }
+    const view=[...items].sort((a,b)=> b.prioridad-a.prioridad || a.orden-b.orden);
+    view.forEach(it=>{
+      const row=document.createElement('div'); row.className='prio-row';
+      const b=document.createElement('span'); b.className='prio-badge '+cls[it.prioridad]; b.textContent=it.prioridad;
+      const n=document.createElement('span'); n.className='prio-item'; n.textContent=`${it.nombre} (${labels[it.prioridad]})`;
+      const o=document.createElement('span'); o.className='muted'; o.style.fontSize='11px'; o.textContent=`llegó #${it.orden}`;
+      row.append(b,n,o); box.appendChild(row);
+    });
+  }
+  function add(nombre,prioridad){
+    items.push({nombre,prioridad,orden:++seq}); draw();
+    status.textContent=`enqueue("${nombre}", ${labels[prioridad]}): se agregó con prioridad ${prioridad}.`;
+  }
+  document.querySelector('#prioEnqHigh').onclick=()=>add('urgente',3);
+  document.querySelector('#prioEnqMid').onclick=()=>add('normal',2);
+  document.querySelector('#prioEnqLow').onclick=()=>add('diferido',1);
+  document.querySelector('#prioDeq').onclick=()=>{
+    if(items.length===0){status.textContent='⚠️ Subdesbordamiento: cola con prioridad vacía.';return;}
+    const view=[...items].sort((a,b)=> b.prioridad-a.prioridad || a.orden-b.orden);
+    const out=view[0];
+    items=items.filter(x=>x!==out);
+    draw();
+    status.textContent=`dequeue(): sale "${out.nombre}" (${labels[out.prioridad]}). Si hubiera empate, saldría el más antiguo.`;
+  };
+  document.querySelector('#prioReset').onclick=()=>{items=[];seq=0;draw();status.textContent='Cola vacía. Inserta elementos con prioridad.';};
+  draw();
+})();
+
+/* ========= Paréntesis balanceados ========= */
+(function(){
+  const expr='{[()]}';
+  document.querySelector('#exprText').textContent=expr;
+  const box=document.querySelector('#parenVis');
+  const status=document.querySelector('#parenStatus');
+  let idx=0; let pila=[];
+  function draw(){
+    box.innerHTML='';
+    if(pila.length===0){
+      const e=document.createElement('div'); e.className='qcell empty'; e.textContent='∅'; box.appendChild(e);
+    }else{
+      pila.forEach((ch,i)=>{
+        const c=document.createElement('div'); let cls='qcell';
+        if(i===pila.length-1) cls+=' front';
+        c.className=cls; c.innerHTML=`${ch}<small>${i===pila.length-1?'tope':''}</small>`;
+        box.appendChild(c);
+      });
+    }
+  }
+  function reset(){
+    idx=0;pila=[];draw();
+    status.textContent='Pulsa "Siguiente carácter" para procesar.';
+  }
+  document.querySelector('#parenNext').onclick=()=>{
+    if(idx>=expr.length){
+      status.textContent=pila.length===0
+        ?'✅ Expresión balanceada: la pila quedó vacía al final.'
+        :'❌ Quedaron aperturas sin cerrar en la pila.';
+      return;
+    }
+    const c=expr[idx++];
+    if('([{'.includes(c)){
+      pila.push(c); draw();
+      status.textContent=`Carácter '${c}': apertura, se apila.`;
+    }else{
+      const a=pila.pop(); draw();
+      const ok=(a==='('&&c===')')||(a==='['&&c===']')||(a==='{'&&c==='}');
+      status.textContent=ok
+        ?`Carácter '${c}': cierra '${a}', correcto.`
+        :`Carácter '${c}': no coincide con '${a??'nada'}'.`;
+    }
+  };
+  document.querySelector('#parenReset').onclick=reset;
+  draw();
+})();
+
+/* ========= Turnos ========= */
+(function(){
+  let cola=[]; let turno=0;
+  const box=document.querySelector('#turnoVis');
+  const status=document.querySelector('#turnoStatus');
+  function draw(){
+    box.innerHTML='';
+    if(cola.length===0){
+      const e=document.createElement('div'); e.className='qcell empty'; e.textContent='∅'; box.appendChild(e); return;
+    }
+    cola.forEach((n,i)=>{
+      const c=document.createElement('div'); let cls='qcell';
+      if(i===0) cls+=' front';
+      if(i===cola.length-1) cls+=' rear';
+      c.className=cls; c.innerHTML=`T${n}<small>${i===0?'frente':(i===cola.length-1?'final':'')}</small>`;
+      box.appendChild(c);
+      if(i<cola.length-1){const a=document.createElement('span');a.textContent='→';a.style.color='var(--cyan)';a.style.fontWeight='800';box.appendChild(a);}
+    });
+  }
+  document.querySelector('#turnoLlega').onclick=()=>{
+    turno++; cola.push(turno); draw();
+    status.textContent=`Llega cliente T${turno}. Se coloca al final. En cola: ${cola.length}.`;
+  };
+  document.querySelector('#turnoAtiende').onclick=()=>{
+    if(cola.length===0){status.textContent='⚠️ Subdesbordamiento: no hay clientes en la cola.';return;}
+    const t=cola.shift(); draw();
+    status.textContent=`Atendido T${t} (era el frente). En cola: ${cola.length}.`;
+  };
+  document.querySelector('#turnoReset').onclick=()=>{cola=[];turno=0;draw();status.textContent='Cola vacía. Pulsa "Llega cliente" para iniciar.';};
+  draw();
+})();
+
+/* ========= Render inicial ========= */
+render();
+</script>
+</body>
+</html>

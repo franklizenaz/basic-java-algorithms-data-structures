@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Algoritmos y estructuras de datos</title>
+<style>
+:root{
+  --ink:#eef5ff;--muted:#9fb0c8;--line:#284461;
+  --cyan:#4de1d0;--gold:#ffc857;--pink:#ff7b9c;--green:#86efac;
+  --shadow:0 18px 60px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(circle at 15% 0%,#163355 0,#07111f 44%);color:var(--ink)}
+body{overflow-x:hidden}
+
+.app{max-width:1240px;margin:auto;padding:28px 22px 80px}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:46px;height:46px;border:1px solid var(--cyan);border-radius:13px;display:grid;place-items:center;color:var(--cyan);font-weight:800;font-size:15px;box-shadow:0 0 22px #4de1d033}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);font-weight:700}
+.title{font-size:15px;font-weight:700}
+.tagline{color:var(--muted);font-size:13px}
+
+/* Hero */
+.hero{padding:6px 0 12px;max-width:820px}
+h1{font-size:clamp(32px,5vw,56px);line-height:1.02;letter-spacing:-.05em;margin:6px 0 14px}
+p{color:var(--muted);font-size:16px;line-height:1.6;margin:6px 0}
+.lead{font-size:18px;max-width:720px}
+.accent{color:var(--cyan)}
+
+/* Grid de cards */
+.cards{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:22px}
+
+/* Card base */
+.card{
+  position:relative;display:flex;flex-direction:column;
+  min-height:300px;padding:24px;
+  background:linear-gradient(145deg,#10233d,#0b172a);
+  border:1px solid var(--line);border-radius:22px;
+  box-shadow:var(--shadow);
+  text-decoration:none;color:var(--ink);
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease;
+  overflow:hidden;
+}
+.card:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 22px 70px color-mix(in oklab,var(--accent) 22%,transparent)}
+.card:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+
+/* Acento por unidad */
+.card.u1{--accent:var(--cyan)}
+.card.u2{--accent:var(--gold)}
+.card.u3{--accent:var(--pink)}
+.card.u4{--accent:var(--green)}
+.card::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 100% 0%,color-mix(in oklab,var(--accent) 22%,transparent) 0,transparent 55%);
+  opacity:.9;pointer-events:none;
+}
+.card > *{position:relative;z-index:1}
+
+/* Cabecera de card */
+.card-head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.badge{
+  width:48px;height:48px;border-radius:13px;flex:0 0 auto;
+  display:grid;place-items:center;font-weight:800;font-size:15px;
+  border:1px solid var(--accent);color:var(--accent);
+  background:color-mix(in oklab,var(--accent) 14%,transparent);
+  box-shadow:0 0 18px color-mix(in oklab,var(--accent) 30%,transparent);
+}
+.card-eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800}
+.card-title{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:0}
+.card-sub{color:var(--muted);font-size:14px;margin:6px 0 14px}
+
+/* Lista de temas */
+.topics{list-style:none;padding:0;margin:0 0 18px;display:flex;flex-direction:column;gap:7px}
+.topics li{display:flex;align-items:flex-start;gap:9px;color:var(--muted);font-size:13.5px;line-height:1.45}
+.topics li::before{
+  content:"";flex:0 0 6px;width:6px;height:6px;border-radius:50%;
+  background:var(--accent);margin-top:7px;box-shadow:0 0 8px var(--accent);
+}
+
+/* Pie de card */
+.card-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cta{
+  display:inline-flex;align-items:center;gap:8px;
+  font-weight:800;font-size:14px;color:var(--accent);
+  padding:10px 16px;border-radius:12px;
+  background:color-mix(in oklab,var(--accent) 14%,transparent);
+  border:1px solid color-mix(in oklab,var(--accent) 45%,transparent);
+  transition:background .2s ease,transform .2s ease;
+}
+.card:hover .cta{background:color-mix(in oklab,var(--accent) 24%,transparent)}
+.cta .arrow{transition:transform .25s ease}
+.card:hover .cta .arrow{transform:translateX(4px)}
+.meta{font-size:11px;color:var(--muted);text-align:right;line-height:1.4}
+
+/* Tamaños */
+.card.span-6{grid-column:span 6}
+
+/* Footer */
+.footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+
+/* Responsive */
+@media(max-width:800px){
+  .card.span-6{grid-column:span 12}
+  .app{padding:20px 16px 60px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<main class="app">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">AED</div>
+      <div>
+        <div class="eyebrow">Algoritmos y estructuras de datos</div>
+        <div class="title">Explora las unidades</div>
+      </div>
+    </div>
+    <div class="tagline">4 presentaciones interactivas</div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Cuatro unidades, una <span class="accent">ruta</span> de aprendizaje.</h1>
+    <p class="lead">Elige una unidad para abrir su presentación interactiva. Cada una incluye teoría, laboratorios animados, retos y checklist de entrega.</p>
+  </section>
+
+  <!-- Cards -->
+  <section class="cards" aria-label="Unidades del curso">
+
+    <!-- U1 -->
+    <a class="card u1 span-6" href="#" aria-label="Abrir Unidad 1: Estructuras de datos lineales">
+      <div>
+        <div class="card-head">
+          <div class="badge">01</div>
+          <div>
+            <div class="card-eyebrow">Estructuras estáticas</div>
+            <h3 class="card-title">Estructuras de datos lineales</h3>
+          </div>
+        </div>
+        <p class="card-sub">Arreglos unidimensionales y bidimensionales: la base de todo.</p>
+        <ul class="topics">
+          <li>Cómo se almacenan los datos en memoria</li>
+          <li>Operaciones 1D: insertar, actualizar, eliminar, recorrer</li>
+          <li>Comparar, clonar, fusionar y arreglos paralelos</li>
+          <li>Matrices poco densas: triangular, tridiagonal, simétrica</li>
+          <li>Determinante, inversión y transposición</li>
+        </ul>
+      </div>
+      <div class="card-foot">
+        <span class="cta">Abrir <span class="arrow">→</span></span>
+      </div>
+    </a>
+
+    <!-- U2 -->
+    <a class="card u2 span-6" href="#" aria-label="Abrir Unidad 2: Estructuras de datos dinámicas">
+      <div>
+        <div class="card-head">
+          <div class="badge">02</div>
+          <div>
+            <div class="card-eyebrow">Estructuras dinámicas</div>
+            <h3 class="card-title">Listas enlazadas</h3>
+          </div>
+        </div>
+        <p class="card-sub">Nodos que se conectan: del TAD a las listas simples, dobles y circulares.</p>
+        <ul class="topics">
+          <li>Qué es un TAD: especificación informal y formal</li>
+          <li>Nodo, referencia, head, tail y null</li>
+          <li>Listas enlazadas simples: inserción, eliminación, búsqueda</li>
+          <li>Ordenamiento por inserción ordenada</li>
+          <li>Listas doblemente enlazadas y circulares</li>
+        </ul>
+      </div>
+      <div class="card-foot">
+        <span class="cta">Abrir <span class="arrow">→</span></span>
+      </div>
+    </a>
+
+    <!-- U3 -->
+    <a class="card u3 span-6" href="course-units/unit03.html" aria-label="Abrir Unidad 3: Pilas y colas">
+      <div>
+        <div class="card-head">
+          <div class="badge">03</div>
+          <div>
+            <div class="card-eyebrow">Estructuras dinámicas</div>
+            <h3 class="card-title">Pilas y colas</h3>
+          </div>
+        </div>
+        <p class="card-sub">Dos formas de ordenar la salida: último en entrar y primero en salir.</p>
+        <ul class="topics">
+          <li>Pila: definición, tope y operaciones push/pop/peek</li>
+          <li>Implementación con arreglo y con lista enlazada</li>
+          <li>Cola: frente y final, operaciones enqueue/dequeue</li>
+          <li>Cola circular con operador módulo</li>
+          <li>Colas con prioridad: lista ordenada y montículo (heap)</li>
+          <li>Aplicaciones: paréntesis balanceados y turnos</li>
+        </ul>
+      </div>
+      <div class="card-foot">
+        <span class="cta">Abrir <span class="arrow">→</span></span>
+      </div>
+    </a>
+
+    <!-- U4 -->
+    <a class="card u4 span-6" href="#" aria-label="Abrir Unidad 4: Árboles, ABB y AVL">
+      <div>
+        <div class="card-head">
+          <div class="badge">04</div>
+          <div>
+            <div class="card-eyebrow">Estructuras no lineales</div>
+            <h3 class="card-title">Árboles, ABB y AVL</h3>
+          </div>
+        </div>
+        <p class="card-sub">De una línea a una jerarquía: búsqueda eficiente sobre árboles.</p>
+        <ul class="topics">
+          <li>Terminología: raíz, hoja, altura, profundidad</li>
+          <li>Recorridos: preorden, inorden, postorden</li>
+          <li>Árbol binario de búsqueda (ABB): inserción, búsqueda, eliminación</li>
+          <li>Árboles AVL: factor de balance y rotaciones LL, RR, LR, RL</li>
+          <li>Inserción con balanceo y borrado equilibrado</li>
+        </ul>
+      </div>
+      <div class="card-foot">
+        <span class="cta">Abrir <span class="arrow">→</span></span>
+      </div>
+    </a>
+
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>Algoritmos y estructuras de datos</span>
+    <span>Navega con <b class="accent">Tab</b> + <b class="accent">Enter</b></span>
+  </footer>
+
+</main>
+</body>
+</html>
